@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "University Courses Manager",
+  "name_for_model": "university_courses",
+  "description_for_human": "Manage university course information. Features include viewing course details and accessing specific course information by course code.",
+  "description_for_model": "Plugin for managing university courses, allowing you to view and access detailed information about various courses.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "http://172.30.76.166:5000/openapi.yaml"
+  },
+  "logo_url": "http://172.30.76.166:5000/logo.png",
+  "contact_email": "support@university.edu",
+  "legal_info_url": "https://university.edu/legal"
+}

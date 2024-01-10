@@ -1,0 +1,100 @@
+import requests
+import re
+from bs4 import BeautifulSoup
+import sqlite3
+import time
+import urllib3
+import ssl
+
+
+class CustomHttpAdapter (requests.adapters.HTTPAdapter):
+    # "Transport adapter" that allows us to use custom ssl_context.
+
+    def __init__(self, ssl_context=None, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections, maxsize=maxsize,
+            block=block, ssl_context=self.ssl_context)
+
+
+def get_legacy_session():
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+    session = requests.session()
+    session.mount('https://', CustomHttpAdapter(ctx))
+    return session
+
+
+def fetch_and_parse(url):
+    response = get_legacy_session().get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    # Make a dictionary to store the data
+    data = {}
+    # Extract the title
+    data['title'] = soup.title.text
+    # Extract Course Code and Name
+    # Extract Course Code and Name
+    data['course_code'] = soup.find('th', text='Course Code').find_next_sibling('td').text
+    data['course_name'] = soup.find('th', text='Course').find_next_sibling('td').text
+    # Extract Course Description
+    data['course_description'] = soup.find('th', text='Course Description').find_next_sibling('td').text
+    return data
+
+
+def fetch_and_parse_links(url):
+    response = get_legacy_session().get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    links = soup.find_all('a', href=True)
+    extracted_links = [link['href'] for link in links if 'href' in link.attrs]
+    print('Found ' + str(len(extracted_links)) + ' links.')
+    return extracted_links
+
+def filter_links(links):
+    # Updated pattern to exclude links with a year at the end
+    pattern = re.compile(r'/course-outlines/\d+/\d+/sem-\d+/$')
+    return [r'http://www.adelaide.edu.au' + link for link in links if pattern.match(link)]
+
+# URLs to scrape
+urls_to_scrape = [
+    'http://www.adelaide.edu.au/course-outlines/ug/',
+    'http://www.adelaide.edu.au/course-outlines/pgcw/'
+]
+
+# SQLite database connection
+conn = sqlite3.connect('university_courses.db')
+cursor = conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    course_code TEXT,
+    course_name TEXT,
+    course_description TEXT
+)
+""")
+
+all_links = []
+for url in urls_to_scrape:
+    print('Scraping URL: ' + url)
+    links = fetch_and_parse_links(url)
+    all_links.extend(links)
+# print(all_links[:100])
+filtered_links = filter_links(all_links)
+print('Found ' + str(len(filtered_links)) + ' links to scrape.')
+
+for url in filtered_links[:5]:
+    data = fetch_and_parse(url)  # Define this function to parse course details
+    # Insert data into database
+    # Example: cursor.execute("INSERT INTO courses (title) VALUES (?)", (data['title'],))
+    # conn.commit()
+    cursor.execute("INSERT INTO courses (title, course_code, course_name, course_description) VALUES (?, ?, ?, ?)", (data['title'], data['course_code'], data['course_name'], data['course_description']))
+    conn.commit()
+
+    # print(data)
+    print('Sleeping for 2 seconds...')
+    time.sleep(2)
+
+conn.close()
