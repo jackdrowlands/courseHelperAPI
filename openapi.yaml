@@ -6,10 +6,10 @@ info:
 servers:
   - url: http://172.30.76.166:5000
 paths:
-  /UoA/courses:
+  /UoA/courses/{level}:
     get:
       operationId: getCourses
-      summary: Get a list of all courses
+      summary: Get a list of all courses at a specific level
       responses:
         "200":
           description: A list of courses
@@ -58,6 +58,30 @@ components:
         course_name:
           type: string
           description: The name of the course
+        level:
+          type: string
+          description: The level of the course
+        term:
+          type: string
+          description: The term of the course
+        location:
+          type: string
+          description: The location of the course
+        units:
+          type: string
+          description: The units of the course
+        contact:
+          type: string
+          description: The contact hours of the course
         course_description:
           type: string
           description: The description of the course
+        prerequisites:
+          type: string
+          description: The prerequisites of the course
+        incompatible:
+          type: string
+          description: The incompatible courses of the course
+        assumed_knowledge:
+          type: string
+          description: The assumed knowledge of the course

@@ -19,33 +19,55 @@ def close_db_connection(conn):
 
 # Ensure the database is initialized
 
-@app.route('/UoA/courses', methods=['GET'])
-def get_courses():
+@app.route('/UoA/courses/<string:level>', methods=['GET'])
+def get_courses(level):
     conn = get_db_connection()
-    courses = conn.execute('SELECT title FROM courses').fetchall()
+    # Concatenate course_code and course_name in the query
+    courses = conn.execute(
+        'SELECT DISTINCT course_code || " - " || course_name as course_full_name FROM courses WHERE level = ?',
+        (level,)
+    ).fetchall()
     close_db_connection(conn)
-    return jsonify([dict(course) for course in courses])
+    
+    # Create a list of course names
+    course_list = [course['course_full_name'] for course in courses]
+    
+    return jsonify(course_list)
 
-# @app.route('/courses', methods=['POST'])
-# def create_course():
-    course = request.json
-    conn = get_db_connection()
-    cursor = conn.execute('INSERT INTO courses (title, course_code, course_name, course_description) VALUES (?, ?, ?, ?)', 
-                          (course['title'], course['course_code'], course['course_name'], course['course_description']))
-    conn.commit()
-    new_course_id = cursor.lastrowid
-    close_db_connection(conn)
-    course['id'] = new_course_id
-    return jsonify(course), 201
 
 @app.route('/UoA/courses/<string:course_code>', methods=['GET'])
 def get_course(course_code):
-    conn = get_db_connection()
-    course = conn.execute('SELECT * FROM courses WHERE course_code = ?', (course_code,)).fetchone()
-    close_db_connection(conn)
-    if course:
-        return jsonify(dict(course))
-    return jsonify({'message': 'Course not found'}), 404
+    try:
+        conn = get_db_connection()
+        # Ensure the course_code is correctly formatted
+        # For example, replace any URL-encoded spaces (%20) with actual spaces
+        formatted_course_code = course_code.replace('%20', ' ')
+        
+        # Fetch all courses with the given course_code
+        courses = conn.execute(
+            'SELECT * FROM courses WHERE course_code = ?',
+            (formatted_course_code,)
+        ).fetchall()
+        close_db_connection(conn)
+    except Exception as e:
+        return jsonify({'message': 'Database error: ' + str(e)}), 500
+
+    if courses:
+        # Convert each course row to a dictionary
+        courses_info = [dict(course) for course in courses]
+
+        # If there are multiple courses with the same code, concatenate their term fields
+        if len(courses_info) > 1:
+            terms = ', '.join(course['term'] for course in courses_info)
+            course_info = {**courses_info[0], 'term': terms}
+        else:
+            course_info = courses_info[0]
+
+        return jsonify(course_info)
+    else:
+        return jsonify({'message': 'Course not found'}), 404
+
+
 
 
 @app.get("/logo.png")
@@ -69,4 +91,4 @@ async def openapi_spec():
         return jsonify(yaml.load(text))
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', debug=True)
+  app.run(host='0.0.0.0', debug=True, ssl_context=('/workspaces/courseHelperAPI/cert.pem', '/workspaces/courseHelperAPI/key.pem'))
