@@ -17,15 +17,39 @@ def get_db_connection():
 def close_db_connection(conn):
     conn.close()
 
-# Ensure the database is initialized
+import re
 
-@app.route('/UoA/courses/<string:level>', methods=['GET'])
-def get_courses(level):
+def get_subject(course_code):
+    match = re.match(r'(.*?)(?=\d)', course_code)
+    return match.group(1).strip() if match else None
+
+# Register the function with SQLite
+sqlite3.enable_callback_tracebacks(True)
+sqlite3.connect(':memory:').create_function('get_subject', 1, get_subject)
+
+@app.route('/UoA/subjects', methods=['GET'])
+def get_subjects():
     conn = get_db_connection()
+    conn.create_function('get_subject', 1, get_subject)
+    subjects = conn.execute(
+        'SELECT DISTINCT get_subject(course_code) as subject FROM courses'
+    ).fetchall()
+    close_db_connection(conn)
+    
+    # Create a list of subjects
+    subject_list = [subject['subject'] for subject in subjects]
+    
+    return jsonify(subject_list)
+
+
+@app.route('/UoA/courses/<string:subject>/<string:level>', methods=['GET'])
+def get_courses(subject, level):
+    conn = get_db_connection()
+    conn.create_function('get_subject', 1, get_subject)
     # Concatenate course_code and course_name in the query
     courses = conn.execute(
-        'SELECT DISTINCT course_code || " - " || course_name as course_full_name FROM courses WHERE level = ?',
-        (level,)
+        'SELECT DISTINCT course_code || " - " || course_name as course_full_name FROM courses WHERE get_subject(course_code) = ? AND level = ?',
+        (subject, level,)
     ).fetchall()
     close_db_connection(conn)
     
@@ -35,39 +59,26 @@ def get_courses(level):
     return jsonify(course_list)
 
 
+
 @app.route('/UoA/courses/<string:course_code>', methods=['GET'])
 def get_course(course_code):
-    try:
-        conn = get_db_connection()
-        # Ensure the course_code is correctly formatted
-        # For example, replace any URL-encoded spaces (%20) with actual spaces
-        formatted_course_code = course_code.replace('%20', ' ')
-        
-        # Fetch all courses with the given course_code
-        courses = conn.execute(
-            'SELECT * FROM courses WHERE course_code = ?',
-            (formatted_course_code,)
-        ).fetchall()
-        close_db_connection(conn)
-    except Exception as e:
-        return jsonify({'message': 'Database error: ' + str(e)}), 500
-
-    if courses:
-        # Convert each course row to a dictionary
-        courses_info = [dict(course) for course in courses]
-
-        # If there are multiple courses with the same code, concatenate their term fields
-        if len(courses_info) > 1:
-            terms = ', '.join(course['term'] for course in courses_info)
-            course_info = {**courses_info[0], 'term': terms}
-        else:
-            course_info = courses_info[0]
-
-        return jsonify(course_info)
-    else:
-        return jsonify({'message': 'Course not found'}), 404
-
-
+    conn = get_db_connection()
+    course = conn.execute(
+        'SELECT * FROM courses WHERE course_code = ?',
+        (course_code,)
+    ).fetchall()
+    close_db_connection(conn)
+    # check if more than one course is returned
+    # if it is, conjoin the terms
+    if course is None:
+        return jsonify({'error': 'Course not found'}), 404
+    if len(course) > 1:
+        terms = [course['term'] for course in course]
+        course_dict = dict(course[0])  # Convert the sqlite3.Row object to a dictionary
+        course_dict['term'] = ', '.join(terms)
+        course = [course_dict]  # Replace the list of sqlite3.Row objects with a list of dictionaries
+    # check if course is empty
+    return jsonify([dict(row) for row in course])
 
 
 @app.get("/logo.png")
