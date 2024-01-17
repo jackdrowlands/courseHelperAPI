@@ -81,5 +81,6 @@ async def openapi_spec():
         spec = yaml.safe_load(text) # Use safe_load for security
     return jsonify(spec)
 
-if __name__ == '__main__':
-  app.run(host='0.0.0.0')
+@app.route('/')
+def home():
+    return 'Course Helper API'
