@@ -1,15 +1,41 @@
 openapi: 3.0.1
 info:
   title: University Courses API
-  description: API for managing university courses, including retrieving and adding course information.
+  description: API for retrieving university course information.
   version: "1.0"
 servers:
-  - url: http://172.30.76.166:5000
+  - url: URL
 paths:
-  /UoA/courses/{level}:
+  /UoA/subjects:
+    get:
+      operationId: getSubjects
+      summary: Get a list of all subjects
+      responses:
+        "200":
+          description: A list of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+  /UoA/courses/{subject}/{level}:
     get:
       operationId: getCourses
-      summary: Get a list of all courses at a specific level
+      summary: Get a list of all courses of a specific subject at a specific level
+      parameters:
+        - in: path
+          name: subject
+          schema:
+            type: string
+          required: true
+          description: The subject of the courses. This parameter must be from the list of all subjects.
+        - in: path
+          name: level
+          schema:
+            type: string
+          required: true
+          description: The level of courses. (Undergraduate, Postgraduate Coursework)
       responses:
         "200":
           description: A list of courses
@@ -18,8 +44,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
-
+                  $ref: "#/components/schemas/Course"
   /UoA/courses/{course_code}:
     get:
       operationId: getCourse
@@ -30,17 +55,16 @@ paths:
           schema:
             type: string
           required: true
-          description: The course code of the course
+          description: The course code of the course. This parameter must be from the list of all course codes.
       responses:
         "200":
           description: Course details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: "#/components/schemas/Course"
         "404":
           description: Course not found
-
 components:
   schemas:
     Course:
@@ -85,3 +109,9 @@ components:
         assumed_knowledge:
           type: string
           description: The assumed knowledge of the course
+    Subject:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The unique name of the subject
