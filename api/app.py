@@ -9,7 +9,7 @@ from urllib.parse import unquote
 app = Flask(__name__)
 
 # Database Configuration
-DATABASE = os.getenv('DATABASE_PATH', 'university_courses.db')
+DATABASE = os.getenv('DATABASE_PATH', 'api/university_courses.db')
 
 def get_subject(course_code):
     match = re.match(r'(.*?)(?=\d)', course_code)
