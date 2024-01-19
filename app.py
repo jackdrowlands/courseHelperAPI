@@ -8,19 +8,28 @@ from urllib.parse import unquote
 
 app = Flask(__name__)
 
-# Database Configuration
+# Database configuration: Get the database path from environment variable or use default
 DATABASE = os.getenv('DATABASE_PATH', 'university_courses.db')
 
 def get_subject(course_code):
+    """
+    Extracts the subject part from a course code using regular expression.
+    Example: For 'MATH 1001', it returns 'MATH'.
+    """
     match = re.match(r'(.*?)(?=\d)', course_code)
     return match.group(1).strip() if match else None
 
 def get_db_connection():
+    """
+    Creates and returns a database connection.
+    The custom function 'get_subject' is registered for use in SQL queries.
+    """
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     conn.create_function('get_subject', 1, get_subject)  # Register the function here
     return conn
 
+# Register the custom function with the database connection in the app context
 with app.app_context():
     sqlite3.enable_callback_tracebacks(True)
     with get_db_connection() as conn:
@@ -28,6 +37,9 @@ with app.app_context():
 
 @app.route('/UoA/subjects', methods=['GET'])
 def get_subjects():
+    """
+    API endpoint to get a list of distinct subjects.
+    """
     with get_db_connection() as conn:
         subjects = conn.execute(
             'SELECT DISTINCT get_subject(course_code) as subject FROM courses'
@@ -36,6 +48,9 @@ def get_subjects():
 
 @app.route('/UoA/courses/<string:subject>/<string:level>', methods=['GET'])
 def get_courses(subject, level):
+    """
+    API endpoint to get courses based on subject and level.
+    """
     subject = unquote(subject)
     level = unquote(level)
     with get_db_connection() as conn:
@@ -47,6 +62,10 @@ def get_courses(subject, level):
 
 @app.route('/UoA/courses/<string:course_code>', methods=['GET'])
 def get_course(course_code):
+    """
+    API endpoint to get details of a specific course.
+    """
+    # The corse code is URL encoded, so we need to decode it first
     course_code = unquote(course_code)
     with get_db_connection() as conn:
         course = conn.execute(
@@ -64,16 +83,26 @@ def get_course(course_code):
 
 @app.get("/logo.png")
 async def plugin_logo():
+    """
+    Endpoint to serve the logo image.
+    """
     filename = 'logo.png'
     return send_file(filename, mimetype='image/png')
 
 @app.get("/.well-known/ai-plugin.json")
 def serve_manifest():
+    """
+    Endpoint to serve the ai-plugin.json file.
+    """
     file = os.path.abspath(__file__)
     return send_from_directory(os.path.dirname(file), 'ai-plugin.json')
 
 @app.get("/openapi.yaml")
 async def openapi_spec():
+    """
+    Endpoint to serve the OpenAPI specification.
+    Replaces the placeholder with the actual host in the spec.
+    """
     host = request.headers['Host']
     with open("openapi.yaml") as f:
         text = f.read()
@@ -82,4 +111,5 @@ async def openapi_spec():
     return jsonify(spec)
 
 if __name__ == '__main__':
+  # Run the Flask app
   app.run(host='0.0.0.0')
