@@ -85,7 +85,7 @@ async def plugin_logo():
     """
     Endpoint to serve the logo image.
     """
-    filename = 'logo.png'
+    filename = 'api/logo.png'
     return send_file(filename, mimetype='image/png')
 
 @app.get("/.well-known/ai-plugin.json")
@@ -103,7 +103,7 @@ async def openapi_spec():
     Replaces the placeholder with the actual host in the spec.
     """
     host = request.headers['Host']
-    with open("openapi.yaml") as f:
+    with open("api/openapi.yaml") as f:
         text = f.read()
         text = text.replace("PLUGIN_HOSTNAME", f"https://{host}")
         spec = yaml.safe_load(text) # Use safe_load for security
