@@ -9,9 +9,9 @@
   },
   "api": {
     "type": "openapi",
-    "url": "http://172.30.76.166:5000/openapi.yaml"
+    "url": "PLUGIN_HOSTNAME/openapi.yaml"
   },
-  "logo_url": "http://172.30.76.166:5000/logo.png",
+  "logo_url": "PLUGIN_HOSTNAME/logo.png",
   "contact_email": "support@university.edu",
   "legal_info_url": "https://university.edu/legal"
 }
