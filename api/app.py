@@ -5,6 +5,7 @@ import os
 import re
 from contextlib import closing
 from urllib.parse import unquote
+from flask import Flask, redirect
 
 app = Flask(__name__)
 
@@ -111,4 +112,4 @@ async def openapi_spec():
 
 @app.route('/')
 def home():
-    return 'Course Helper API'
+    return redirect('https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide', code=301)
