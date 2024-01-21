@@ -1,14 +1,14 @@
-# University Courses Helper API
+# University of Adelaide Course Guide API
 
 ## Overview
-The University Courses Helper API is a Flask-based web application designed to manage and provide information about university courses. This application allows users to view course details, access specific course information by course code, and manage course data effectively. It features a RESTful API, a SQLite database for course data storage, and a web parser for extracting course information from specified URLs.
+This repository contains the API for the University of Adelaide Course Guide GPT, an AI-powered guide that helps users select courses at the University of Adelaide. The API, built with Flask, interfaces with a SQLite database to manage and provide detailed information about university courses. It is an integral part of the system, enabling the GPT to access up-to-date course data through structured endpoints.
 
 ## Features
-- REST API to query university courses and subjects.
-- SQLite database integration for storing course information.
-- Customizable web scraping script for extracting course data.
-- OpenAPI specification for API documentation.
-- Plugin manifest (`ai-plugin.json`) for integration with external systems.
+- RESTful API for querying university courses and subjects.
+- Integration with a SQLite database for persistent storage of course information.
+- Custom web scraping script (`webParser.py`) for extracting and updating course data.
+- OpenAPI specification for clear API documentation.
+- Plugin manifest (`ai-plugin.json`) included for broader system integration.
 
 ## Installation
 
@@ -27,27 +27,34 @@ The University Courses Helper API is a Flask-based web application designed to m
    ```
    pip install flask sqlite3 requests beautifulsoup4 pyyaml urllib3
    ```
-3. Run the `webParser.py` script to scrape course data from specified URLs and store it in the database:
+3. Initialize the SQLite database (if not already done):
    ```
-    python webParser.py
-    ```
+   python setup_database.py  # Replace with your actual database setup script
+   ```
 
 ## Running the Application
-To run the application, execute the following command:
+Start the application with:
 ```
 python app.py
 ```
-This will start the Flask server, making the API accessible at `http://localhost:5000`.
+This command launches the Flask server, making the API accessible for the University of Adelaide Course Guide GPT.
 
 ## API Endpoints
-- `GET /UoA/subjects`: Fetches a list of distinct subjects.
-- `GET /UoA/courses/<subject>/<level>`: Retrieves courses based on the subject and level.
-- `GET /UoA/courses/<course_code>`: Gets details of a specific course by course code.
-- Additional endpoints for serving the plugin logo, OpenAPI specification, and plugin manifest.
+The following endpoints are critical for the GPT to function effectively:
+- `GET /UoA/subjects`: Lists distinct subjects available.
+- `GET /UoA/courses/<subject>/<level>`: Retrieves courses based on subject and level.
+- `GET /UoA/courses/<course_code>`: Provides details for a specific course.
+- Endpoints for serving plugin assets like logo, OpenAPI spec, and plugin manifest.
 
-## Web Parser Usage
-The `webParser.py` script is used for scraping course data from specified URLs and storing it in the database. Modify the `urls_to_scrape` list as needed for different sources.
+## Web Parser
+The `webParser.py` script scrapes course data from specified URLs for database updates. It's pivotal for maintaining current course information.
 
 ## Configuration Files
-- `ai-plugin.json`: Plugin manifest for external integration.
-- `openapi.yaml`: OpenAPI specification for API documentation.
+- `ai-plugin.json`: Describes the API for integration with external systems.
+- `openapi.yaml`: Documents the API endpoints and their specifications.
+
+## Integration with [University of Adelaide Course Guide GPT](https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide)
+This API is designed to work in tandem with the [University of Adelaide Course Guide GPT](https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide). It provides the necessary backend support for the AI model to deliver accurate and up-to-date course information to users.
+
+## Disclaimer
+This API is not officially endorsed by the University of Adelaide. It is a student project  and is not intended for commercial use.
