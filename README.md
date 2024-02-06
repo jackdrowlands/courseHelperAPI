@@ -1,7 +1,7 @@
 # University of Adelaide Course Guide API
 
 ## Overview
-This repository contains the API for the University of Adelaide Course Guide GPT, an AI-powered guide that helps users select courses at the University of Adelaide. The API, built with Flask, interfaces with a SQLite database to manage and provide detailed information about university courses. It is an integral part of the system, enabling the GPT to access up-to-date course data through structured endpoints.
+This repository contains the API for the [University of Adelaide Course Guide GPT](https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide), an AI-powered guide that helps users select courses at the University of Adelaide. The API, built with Flask, interfaces with a SQLite database to manage and provide detailed information about university courses. It is an integral part of the system, enabling the GPT to access up-to-date course data through structured endpoints.
 
 ## Features
 - RESTful API for querying university courses and subjects.
