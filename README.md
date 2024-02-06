@@ -56,5 +56,12 @@ The `webParser.py` script scrapes course data from specified URLs for database u
 ## Integration with [University of Adelaide Course Guide GPT](https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide)
 This API is designed to work in tandem with the [University of Adelaide Course Guide GPT](https://chat.openai.com/g/g-E2mWxfcoJ-university-of-adelaide-course-guide). It provides the necessary backend support for the AI model to deliver accurate and up-to-date course information to users.
 
+### Examples
+![image](https://github.com/jackdrowlands/courseHelperAPI/assets/119843072/ca25e355-c7be-47e6-a9bf-20a667dc9b75)
+![image](https://github.com/jackdrowlands/courseHelperAPI/assets/119843072/3d887296-d8c2-4c61-9c77-10b1ee9ae7bb)
+![image](https://github.com/jackdrowlands/courseHelperAPI/assets/119843072/42f4021e-3b83-4a5c-a892-6d4f965c399b)
+![image](https://github.com/jackdrowlands/courseHelperAPI/assets/119843072/280b6d3f-f7b7-424e-81b8-8843a0062648)
+
+
 ## Disclaimer
 This API is not officially endorsed by the University of Adelaide. It is a student project  and is not intended for commercial use.
