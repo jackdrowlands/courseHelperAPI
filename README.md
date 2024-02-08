@@ -21,15 +21,11 @@ This repository contains the API for the [University of Adelaide Course Guide GP
 ### Setup
 1. Clone the repository:
    ```
-   git clone [repository URL]
+   git clone git@github.com:jackdrowlands/courseHelperAPI
    ```
 2. Install the required Python libraries:
    ```
-   pip install flask sqlite3 requests beautifulsoup4 pyyaml urllib3
-   ```
-3. Initialize the SQLite database (if not already done):
-   ```
-   python setup_database.py  # Replace with your actual database setup script
+   pip install -r requirements.txt
    ```
 
 ## Running the Application
